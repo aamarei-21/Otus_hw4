@@ -7,28 +7,30 @@
 #include <stdint.h>
 #include <cstddef>
 
-template <class, class = void>
-struct is_containers : std::true_type {};
+template <class>
+struct is_containers : std::false_type {};
 
-template <class T>
-struct is_containers<T, std::enable_if_t<std::iterator_traits<typename T::iterator>::value_type > >:std::false_type{};
+template <class T, class... Args>
+struct is_containers<std::vector<T, Args...> >:std::true_type{};
+
+template <class T, class... Args>
+struct is_containers<std::list<T, Args...> >:std::true_type{};
 
 template <class T>
 constexpr bool is_containers_v = is_containers<T>::value;  //vector or list 
 
+void print_ip(const std::string& arg) {
+	std::cout << arg;
+}
+
 template<class T>
-typename std::enable_if<is_containers_v<T> && !std::is_integral_v<T>, void>::type print_ip(const T& arg) {
+typename std::enable_if<is_containers_v<T>, void>::type print_ip(const T& arg) {
 	// std::cout << "is_same_v = " << (std::is_same_v<std::string, T>) << std::endl;
-	if constexpr (std::is_same_v<std::string, T>) {
-		std::cout << arg;
+	for(auto it = arg.begin(); it != arg.end(); ++it) {
+		if (it != arg.begin()) 
+			std::cout << ".";
+		std::cout << *it;
 	}
-	else {
-		for(auto it = arg.begin(); it != arg.end(); ++it) {
-			if (it != arg.begin()) 
-				std::cout << ".";
-			std::cout << *it;
-		}
-	}	
 }
 
 template<class T>
